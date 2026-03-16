@@ -229,7 +229,7 @@ export default function Homepage() {
 
   // Initial Log
   useEffect(() => {
-    console.log('%c[UI] Ready — v23 Function Integration', 'color: #059669; font-weight: bold;');
+    // console.log('%c[UI] Ready — v23 Function Integration', 'color: #059669; font-weight: bold;');
   }, []);
 
   // Auto-scroll highlight
@@ -392,11 +392,11 @@ export default function Homepage() {
 
       switch (msg.type) {
         case 'log':
-          console.info(`[${msg.tag || 'SRV'}] ${msg.data}`);
+          // console.info(`[${msg.tag || 'SRV'}] ${msg.data}`);
           break;
 
         case 'session_ready':
-          console.log('%c[SESSION] Gemini ready — speak now!', 'color: #059669; font-weight: bold;');
+          // console.log('%c[SESSION] Gemini ready — speak now!', 'color: #059669; font-weight: bold;');
           break;
 
         case 'audioStream':
@@ -408,12 +408,12 @@ export default function Homepage() {
           break;
 
         case 'turn_complete':
-          console.log(`[SESSION] Turn complete · ${msg.chunks} chunks · ${msg.frags} frags`);
+          // console.log(`[SESSION] Turn complete · ${msg.chunks} chunks · ${msg.frags} frags`);
           setIsLoading(false); 
           break;
 
         case 'flash_result':
-          console.log(`%c[FLASH] ${msg.data.intent} | sq:"${msg.data.search_query || ''}"`, 'color: #d97706; font-weight: bold;');
+          // console.log(`%c[FLASH] ${msg.data.intent} | sq:"${msg.data.search_query || ''}"`, 'color: #d97706; font-weight: bold;');
           
           const intent = msg.data.intent;
           
@@ -430,7 +430,7 @@ export default function Homepage() {
           break;
 
         case 'tool_call':
-          console.log(`%c[TOOL] Executing: ${msg.action}`, 'color: #0891b2; font-weight: bold;');
+          // console.log(`%c[TOOL] Executing: ${msg.action}`, 'color: #0891b2; font-weight: bold;');
           setIsLoading(false);
 
           if (msg.action === 'open_repository') {
@@ -478,7 +478,7 @@ export default function Homepage() {
           break;
 
         case 'quota_error':
-          console.error('[QUOTA] Gemini API quota exhausted');
+          // console.error('[QUOTA] Gemini API quota exhausted');
           setIsLoading(false);
           flushAudio();
           setIsMicOn(false);
@@ -487,7 +487,7 @@ export default function Homepage() {
         case 'flush_audio':
         case 'interrupted':
         case 'gemini_error':
-          console.warn(`[SESSION] ${msg.type}`);
+          // console.warn(`[SESSION] ${msg.type}`);
           setIsLoading(false);
           flushAudio();
           if (msg.type === 'gemini_error') setIsMicOn(false);
@@ -497,13 +497,13 @@ export default function Homepage() {
           break;
       }
     } catch (err) {
-      console.error("[ERROR] Parsing WS message:", err);
+      // console.error("[ERROR] Parsing WS message:", err);
     }
   };
 
   const toggleMic = async () => {
     if (isMicOn) {
-      console.log('[SESSION] Ending session...');
+      // console.log('[SESSION] Ending session...');
       setIsMicOn(false);
       if (wsRef.current) { wsRef.current.close(); wsRef.current = null; }
       if (workletNodeRef.current) workletNodeRef.current.disconnect();
@@ -512,13 +512,13 @@ export default function Homepage() {
       flushAudio();
     } else {
       try {
-        console.log('[SESSION] Starting session...');
+        // console.log('[SESSION] Starting session...');
         const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8080/ws';
         wsRef.current = new WebSocket(wsUrl);
 
-        wsRef.current.onopen = () => console.log('%c[WS] Connected', 'color: #059669; font-weight: bold;');
-        wsRef.current.onerror = () => console.error('[WS] Connection Error');
-        wsRef.current.onclose = (e) => console.warn(`[WS] Closed. Code: ${e.code}`);
+        // wsRef.current.onopen = () => console.log('%c[WS] Connected', 'color: #059669; font-weight: bold;');
+        // wsRef.current.onerror = () => console.error('[WS] Connection Error');
+        // wsRef.current.onclose = (e) => console.warn(`[WS] Closed. Code: ${e.code}`);
 
         wsRef.current.onmessage = handleWebSocketMessage;
 
@@ -564,7 +564,7 @@ export default function Homepage() {
         source.connect(workletNode); 
         setIsMicOn(true);
       } catch (err) {
-        console.error("[ERROR] Failed to start mic/connection:", err);
+        // console.error("[ERROR] Failed to start mic/connection:", err);
       }
     }
   };
