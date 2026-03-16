@@ -10,7 +10,7 @@ function App() {
         <Route path="/" element={<Homepage />} />
         
         {/* Route untuk halaman login */}
-        {/* <Route path="/login" element={<LoginPage />} /> */}
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </div>
   )

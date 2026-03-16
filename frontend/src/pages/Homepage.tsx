@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 // ==========================================
-// 1. THREE.JS SHADERS (UNCHANGED)
+// 1. THREE.JS SHADERS
 // ==========================================
 const noiseShader = `
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
@@ -154,7 +154,6 @@ function IconButton({ icon: Icon, onClick, title, className = "" }: { icon: any,
   );
 }
 
-// Utilitas untuk merender teks dengan highlight keyword
 const renderHighlight = (text: string, keywords: string[]) => {
   if (!text) return "";
   if (!keywords || keywords.length === 0) return text;
@@ -406,32 +405,25 @@ export default function Homepage() {
 
         case 'transcript_user':
         case 'transcript_assistant':
+          break;
+
         case 'turn_complete':
-          break; // Omitted for brevity
+          console.log(`[SESSION] Turn complete · ${msg.chunks} chunks · ${msg.frags} frags`);
+          setIsLoading(false); 
+          break;
 
         case 'flash_result':
           console.log(`%c[FLASH] ${msg.data.intent} | sq:"${msg.data.search_query || ''}"`, 'color: #d97706; font-weight: bold;');
-          // Fast path actions
-          if (msg.data.intent === 'open_repository' || msg.data.intent === 'back_to_repository') {
-            setSearchQuery(msg.data.search_query || "");
-            setIsLoading(true); 
+          
+          const intent = msg.data.intent;
+          
+          // FAST-PATH
+          if (intent === 'close_panel') {
+            setIsPanelOpen(false);
+          } else if (intent === 'back_to_repository') {
             setPanelView('repository');
             setIsPanelOpen(true);
-            setActiveKeywords([]);
-          } else if (msg.data.intent === 'fetch_news') { 
-            setSearchQuery(msg.data.search_query || "");
-            setIsLoading(true);
-            setPanelView('news'); 
-            setIsPanelOpen(true);
-          } else if (msg.data.intent === 'open_deep_search') {
-            setPanelView('preview');
-            setIsPanelOpen(true);
-          } else if (msg.data.intent === 'open_detail') {
-            setPanelView('detail');
-            setIsPanelOpen(true);
-          } else if (msg.data.intent === 'close_panel') {
-            setIsPanelOpen(false);
-          } else if (msg.data.intent === 'highlight_keywords') {
+          } else if (intent === 'highlight_keywords') {
             setActiveKeywords(msg.data.keywords || []);
             if (panelView !== 'preview') setPanelView('preview');
           }
@@ -444,15 +436,17 @@ export default function Homepage() {
           if (msg.action === 'open_repository') {
             setDocuments(msg.documents || msg.data?.documents || []);
             if (msg.newest && msg.newest.length > 0) setNewestDocs(msg.newest);
-            setSearchQuery(msg.query || "");
+            setSearchQuery(msg.query || msg.data?.query || "");
             setPanelView('repository');
+            setActiveKeywords(msg.keywords || msg.data?.keywords || []);
+            
             setIsPanelOpen(true);
-            setActiveKeywords(msg.keywords || []);
 
           } else if (msg.action === 'show_news') {
             setNewsArticles(msg.articles || msg.data?.articles || []);
-            setSearchQuery(msg.query || "");
+            setSearchQuery(msg.query || msg.data?.query || "");
             setPanelView('news');
+            
             setIsPanelOpen(true);
 
           } else if (msg.action === 'open_deep_search') {
@@ -485,6 +479,7 @@ export default function Homepage() {
 
         case 'quota_error':
           console.error('[QUOTA] Gemini API quota exhausted');
+          setIsLoading(false);
           flushAudio();
           setIsMicOn(false);
           break;
@@ -493,6 +488,7 @@ export default function Homepage() {
         case 'interrupted':
         case 'gemini_error':
           console.warn(`[SESSION] ${msg.type}`);
+          setIsLoading(false);
           flushAudio();
           if (msg.type === 'gemini_error') setIsMicOn(false);
           break;
@@ -705,7 +701,7 @@ export default function Homepage() {
 
           {/* VIEW: 2. PREVIEW / DEEP SEARCH */}
           {panelView === 'preview' && (
-            <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300 pb-12">
+            <div className="flex flex-col animate-in fade-in slide-in-from-right-4 duration-300 pb-12">
               <Card title="Document Preview" subtitle="Detailed document structure and content">
                 
                 {/* Active Keywords Bar */}
@@ -725,18 +721,18 @@ export default function Homepage() {
                   <div className="text-center py-12 text-slate-400 text-sm animate-pulse">Loading document structure...</div>
                 ) : (
                   <div className="flex flex-col gap-6">
-                    {docPreviewData.structure?.map((node: any, nIdx: number) => {
-                      
-                      // RENDER HEADER
-                      if (node.type === 'header') {
-                        return (
-                          <div key={nIdx} className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center shadow-inner">
+                    
+                    {/* Menggabungkan semua Header agar tampil dalam satu Card */}
+                    {docPreviewData.structure?.filter((n: any) => n.type === 'header').length > 0 && (
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center shadow-inner">
+                        {docPreviewData.structure?.filter((n: any) => n.type === 'header').map((node: any, nIdx: number) => (
+                          <div key={nIdx} className={nIdx > 0 ? "mt-5" : ""}>
                             {node.subtype === 'title' ? (
                               <h3 className="text-[15px] font-extrabold text-slate-900 leading-snug uppercase tracking-wide">
                                 {renderHighlight(node.content, activeKeywords)}
                               </h3>
                             ) : (
-                              <div className="mt-6">
+                              <div>
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">TENTANG</div>
                                 <p className="text-sm font-medium text-slate-700 leading-relaxed">
                                   {renderHighlight(node.content, activeKeywords)}
@@ -744,9 +740,12 @@ export default function Homepage() {
                               </div>
                             )}
                           </div>
-                        );
-                      }
+                        ))}
+                      </div>
+                    )}
 
+                    {docPreviewData.structure?.filter((n: any) => n.type !== 'header').map((node: any, nIdx: number) => {
+                      
                       // RENDER PREAMBLE
                       if (node.type === 'preamble') {
                         return (
@@ -754,12 +753,20 @@ export default function Homepage() {
                             {node.label && <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-4">{node.label}</h4>}
                             {node.contents?.length ? (
                               <ul className="space-y-3">
-                                {node.contents.map((item: any, iIdx: number) => (
-                                  <li key={iIdx} className="flex gap-3">
-                                    <span className="font-bold text-slate-900 shrink-0">{item.point}.</span>
-                                    <span>{renderHighlight(item.content, activeKeywords)}</span>
-                                  </li>
-                                ))}
+                                {node.contents.map((item: any, iIdx: number) => {
+                                  const contentStr = item.content || '';
+                                  // Ekstrak awalan angka atau huruf list (misalnya "a." atau "1.")
+                                  const match = contentStr.match(/^\s*([a-zA-Z0-9]+)\.\s*/);
+                                  const bullet = match ? match[1] : item.point;
+                                  const cleanContent = match ? contentStr.replace(/^\s*([a-zA-Z0-9]+)\.\s*/, '') : contentStr;
+                                  
+                                  return (
+                                    <li key={iIdx} className="flex gap-3">
+                                      {bullet && <span className="font-bold text-slate-900 shrink-0 min-w-[28px]">{bullet}.</span>}
+                                      <span>{renderHighlight(cleanContent, activeKeywords)}</span>
+                                    </li>
+                                  );
+                                })}
                               </ul>
                             ) : (
                               <p>{renderHighlight(node.content, activeKeywords)}</p>
@@ -781,12 +788,16 @@ export default function Homepage() {
                                 <div key={sIdx}>
                                   <div className="text-xs font-extrabold text-slate-800 mb-2 tracking-wide">Section {sec.number}</div>
                                   <div className="space-y-2">
-                                    {sec.contents?.map((verse: any, vIdx: number) => (
-                                      <div key={vIdx} className="text-[13px] text-slate-700 leading-relaxed flex gap-2">
-                                        {verse.point && <span className="font-bold text-slate-900 shrink-0">({verse.point})</span>}
-                                        <span>{renderHighlight(verse.content, activeKeywords)}</span>
-                                      </div>
-                                    ))}
+                                    {sec.contents?.map((verse: any, vIdx: number) => {
+                                      // Hilangkan awalan angka duplikat jika ada (misal "1. ")
+                                      const cleanContent = verse.content ? verse.content.replace(/^\s*\d+\.\s*/, '') : '';
+                                      return (
+                                        <div key={vIdx} className="text-[13px] text-slate-700 leading-relaxed flex gap-2">
+                                          {verse.point && <span className="font-bold text-slate-900 shrink-0 min-w-[28px]">({verse.point})</span>}
+                                          <span>{renderHighlight(cleanContent, activeKeywords)}</span>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               ))}
@@ -805,7 +816,7 @@ export default function Homepage() {
 
           {/* VIEW: 3. DETAIL (SUMMARY & RELATIONS) */}
           {panelView === 'detail' && (
-            <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="flex flex-col animate-in fade-in slide-in-from-right-4 duration-300 pb-12">
               <Card title="Regulation Details" subtitle="Summary information and related regulations">
                 
                 {!docDetailData ? (

@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -5,17 +7,17 @@ const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; 
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// --- KONFIGURASI DATABASE ---
+// --- KONFIGURASI DATABASE DARI .ENV ---
 const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'tendr'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 };
 
 async function getConnection() {
@@ -130,31 +132,6 @@ app.post('/api/login', async (req, res) => {
 
     } catch (error) {
         console.error("Error Login:", error);
-        res.status(500).json({ success: false, message: "Error server" });
-    } finally {
-        if (connection) await connection.end();
-    }
-});
-
-// --- ROUTE LOGOUT (BARU) ---
-app.post('/api/logout', async (req, res) => {
-    const { userId } = req.body;
-
-    // Jika userId tidak dikirim, tetap anggap sukses (clear session di frontend)
-    if (!userId) {
-        return res.status(200).json({ success: true, message: "Logout frontend only" });
-    }
-
-    let connection;
-    try {
-        connection = await getConnection();
-        // Update status menjadi offline (0)
-        await connection.execute('UPDATE users SET is_online = 0 WHERE id = ?', [userId]);
-        
-        console.log(`User ID ${userId} logout.`);
-        res.status(200).json({ success: true, message: "Logout berhasil" });
-    } catch (error) {
-        console.error("Error Logout:", error);
         res.status(500).json({ success: false, message: "Error server" });
     } finally {
         if (connection) await connection.end();
