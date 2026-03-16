@@ -66,17 +66,13 @@ The pipeline consists of three main components.
 - Extracts basic metadata
 - Downloads regulation PDF files
 
-## 📄 bi_ingest.py
+## 📄 ingest.py
 
 - Extracts text from PDFs using:
   - **pdfplumber**
   - fallback **PyMuPDF OCR**
 - Parses metadata from documents
 - Ingests data into Elasticsearch
-
-## 🔁 run_pipeline.py
-
-Runs the entire process end-to-end:
 
 ```
 scrape → download → OCR → ingest
