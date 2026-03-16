@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Legalitik Voice Agent v22.4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'"/>
+  <script>(function(){var s=document.createElement('script');s.src='https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js';s.async=true;document.head.appendChild(s);})();</script>
+  <style>
+    :root {
+      /* ── Light mode palette ── */
+      --bg:      #f0f2f5;
+      --s:       #ffffff;
+      --s2:      #f7f8fa;
+      --s3:      #f0f2f5;
+      --bdr:     #e2e5ea;
+      --bdr2:    #ebeef2;
+      --t1:      #111827;
+      --t2:      #374151;
+      --t3:      #6b7280;
+      --t4:      #9ca3af;
+      --acc:     #2563eb;
+      --acc-d:   #1d4ed8;
+      --acc-l:   rgba(37,99,235,.08);
+      --acc-ll:  rgba(37,99,235,.04);
+      --grn:     #059669;
+      --grn-l:   rgba(5,150,105,.08);
+      --red:     #dc2626;
+      --red-l:   rgba(220,38,38,.08);
+      --pur:     #7c3aed;
+      --pur-l:   rgba(124,58,237,.08);
+      --yel:     #d97706;
+      --yel-l:   rgba(217,119,6,.08);
+      --cya:     #0891b2;
+      --cya-l:   rgba(8,145,178,.08);
+      --hl:      rgba(250,204,21,.35);
+      --r:       5px;
+      --r2:      9px;
+      --r3:      13px;
+      --sh:      0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --sh2:     0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--t1);
+      height: 100dvh;
+      display: flex;
+      overflow: hidden;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    ::-webkit-scrollbar { width: 3px; height: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 99px; }
+    button { cursor: pointer; font-family: inherit; }
+    select { font-family: inherit; }
+    a { color: var(--acc); }
+
+    /* ── Sidebar ── */
+    #sb {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--s);
+      border-right: 1px solid var(--bdr);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .sb-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--bdr);
+      position: sticky;
+      top: 0;
+      background: var(--s);
+      z-index: 10;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-ic {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--acc), var(--pur));
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(37,99,235,.3);
+    }
+    .logo-t { font-size: 12px; font-weight: 700; letter-spacing: -.01em; }
+    .logo-s { font-size: 9px; color: var(--t4); font-family: 'DM Mono', monospace; }
+
+    .cpill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 9px;
+      border-radius: 99px;
+      background: var(--s2);
+      border: 1px solid var(--bdr);
+      font-size: 9px; font-weight: 600; color: var(--t3);
+      transition: all .3s;
+      cursor: default;
+    }
+    .cpill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--t4); transition: background .3s; }
+    .cpill.on { border-color: rgba(16,185,129,.3); }
+    .cpill.on .dot { background: var(--grn); box-shadow: 0 0 6px var(--grn); }
+    .cpill.on span { color: var(--grn); }
+
+    /* ── Mic area ── */
+    .mic-a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 22px 14px 14px;
+    }
+    .mic-w {
+      position: relative;
+      width: 100px; height: 100px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      display: none;
+    }
+    .ra { border: 1.5px solid rgba(37,99,235,.2); }
+    .rb { border: 1px solid rgba(37,99,235,.10); }
+    @keyframes pr {
+      0%   { transform: scale(1); opacity: .6; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+    .live .ra { display: block; animation: pr 1.8s ease-out infinite; }
+    .live .rb { display: block; animation: pr 1.8s ease-out .7s infinite; }
+
+    #mbtn {
+      position: relative; z-index: 2;
+      width: 76px; height: 76px;
+      border-radius: 50%; border: none;
+      background: linear-gradient(135deg, var(--acc), var(--acc-d));
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(37,99,235,.35);
+      transition: transform .15s, box-shadow .2s;
+    }
+    #mbtn:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(37,99,235,.45); }
+    #mbtn:active { transform: scale(.94); }
+
+    @keyframes spk {
+      0%,100% { box-shadow: 0 0 0 0 rgba(124,58,237,.4); }
+      50%      { box-shadow: 0 0 0 14px rgba(124,58,237,0); }
+    }
+    #mbtn.spk { background: linear-gradient(135deg, var(--pur), #6d28d9); animation: spk 1.4s ease-out infinite; }
+
+    @keyframes cls {
+      0%,100% { box-shadow: 0 0 0 0 rgba(8,145,178,.35); }
+      50%      { box-shadow: 0 0 0 12px rgba(8,145,178,0); }
+    }
+    #mbtn.cls { background: linear-gradient(135deg, var(--cya), #0e7490); animation: cls 1s ease-out infinite; }
+
+    @keyframes rag {
+      0%,100% { box-shadow: 0 0 0 0 rgba(5,150,105,.35); }
+      50%      { box-shadow: 0 0 0 12px rgba(5,150,105,0); }
+    }
+    #mbtn.rag { background: linear-gradient(135deg, var(--grn), #047857); animation: rag 1s ease-out infinite; }
+
+    #slbl {
+      font-size: 10px; font-weight: 600; color: var(--t3);
+      font-family: 'DM Mono', monospace; letter-spacing: .02em;
+    }
+    #slbl.live { color: var(--red); }
+    #slbl.spk  { color: var(--pur); }
+    #slbl.cls  { color: var(--cya); }
+    #slbl.rag  { color: var(--grn); }
+
+    .waves { display: flex; align-items: flex-end; gap: 3px; height: 22px; }
+    @keyframes wv { 0%,100% { height: 4px; } 50% { height: 18px; } }
+    .wb {
+      width: 3px; border-radius: 99px;
+      background: var(--acc);
+      display: none;
+    }
+    .wb.on { display: block; animation: wv 1.1s ease-in-out infinite; }
+    .wb:nth-child(1) { animation-delay: 0s; }
+    .wb:nth-child(2) { animation-delay: .13s; }
+    .wb:nth-child(3) { animation-delay: .26s; }
+    .wb:nth-child(4) { animation-delay: .39s; }
+    .wb:nth-child(5) { animation-delay: .52s; }
+
+    .lctrl { display: none; align-items: center; gap: 6px; }
+    .lctrl.show { display: flex; }
+    .lbtn {
+      display: flex; align-items: center; gap: 3px;
+      padding: 5px 12px; border-radius: 99px;
+      font-size: 10px; font-weight: 600;
+      background: var(--s2); border: 1px solid var(--bdr); color: var(--t2);
+      transition: all .2s;
+    }
+    .lbtn:hover { background: var(--bdr); }
+    .lbtn.muted { background: var(--red-l); border-color: rgba(239,68,68,.3); color: var(--red); }
+    .endbtn {
+      display: flex; align-items: center; gap: 3px;
+      padding: 5px 12px; border-radius: 99px;
+      font-size: 10px; font-weight: 600;
+      background: var(--red); border: none; color: #fff;
+      box-shadow: 0 2px 8px rgba(239,68,68,.35);
+      transition: all .2s;
+    }
+    .endbtn:hover { background: #dc2626; }
+
+    /* ── Context badge ── */
+    .ctx-b {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 9px; font-weight: 600;
+      background: var(--s2); border: 1px solid var(--bdr); color: var(--t3);
+      margin: 0 14px 8px;
+      transition: all .3s;
+      font-family: 'DM Mono', monospace;
+    }
+    .ctx-b.repository { background: var(--acc-l); border-color: rgba(59,130,246,.25); color: var(--acc); }
+    .ctx-b.docpreview { background: var(--pur-l); border-color: rgba(139,92,246,.25); color: var(--pur); }
+    .ctx-b.detail     { background: var(--yel-l); border-color: rgba(245,158,11,.25); color: var(--yel); }
+
+    /* ── Sidebar sections ── */
+    .sb-s { padding: 10px 14px; border-top: 1px solid var(--bdr2); }
+    .sb-sh {
+      font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      color: var(--t4);
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .sb-sh-l { display: flex; align-items: center; gap: 4px; }
+
+    .sg { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .sc {
+      background: var(--s2); border: 1px solid var(--bdr);
+      border-radius: var(--r2); padding: 8px 10px;
+    }
+    .sc .v { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+    .sc .l { font-size: 9px; color: var(--t3); margin-top: 1px; }
+
+    .mg { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; margin-bottom: 8px; }
+    .mc {
+      background: var(--s2); border: 1px solid var(--bdr);
+      border-radius: var(--r2); padding: 6px 4px; text-align: center;
+    }
+    .mc .v { font-size: 15px; font-weight: 700; }
+    .mc .l { font-size: 8px; color: var(--t3); }
+    .mc.f .v { color: var(--pur); }
+    .mc.p .v { color: var(--grn); }
+    .mc.ss .v { color: var(--yel); }
+
+    .ntag {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--acc-l); border: 1px solid rgba(59,130,246,.2);
+      border-radius: 99px; padding: 3px 8px;
+      font-size: 9px; color: var(--acc); font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .clrbtn {
+      font-size: 8px; font-weight: 600;
+      background: var(--red-l); border: 1px solid rgba(239,68,68,.2);
+      border-radius: var(--r); padding: 2px 7px; color: var(--red);
+      transition: all .2s;
+    }
+    .clrbtn:hover { background: rgba(239,68,68,.2); }
+
+    details summary {
+      font-size: 9px; color: var(--t3); cursor: pointer;
+      user-select: none; list-style: none;
+      display: flex; align-items: center; gap: 3px;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    .ml { margin-top: 6px; max-height: 140px; overflow-y: auto; }
+    .mi {
+      font-size: 9px; padding: 2px 8px;
+      border-radius: 0 var(--r) var(--r) 0;
+      margin-bottom: 2px; line-height: 1.45;
+    }
+    .mi.f { border-left: 2px solid var(--pur); background: var(--pur-l); color: #5b21b6; }
+    .mi.p { border-left: 2px solid var(--grn); background: var(--grn-l); color: #065f46; }
+    .mi.n { border-left: 2px solid var(--acc); background: var(--acc-l); color: #1e3a8a; }
+
+    .mic-sel {
+      width: 100%;
+      background: var(--s2); border: 1px solid var(--bdr);
+      border-radius: var(--r); padding: 6px 9px;
+      font-size: 11px; color: var(--t2); outline: none;
+    }
+    .mic-sel:focus { border-color: var(--acc); }
+
+    /* ── Main panel ── */
+    #main { flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+    #dv { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+    .tbar {
+      display: flex; align-items: center; gap: 1px;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--bdr);
+      background: var(--s);
+      flex-shrink: 0;
+    }
+    .tbtn {
+      padding: 5px 10px;
+      font-size: 10px; font-weight: 600;
+      border-radius: var(--r);
+      background: none; border: none;
+      color: var(--t3);
+      transition: all .2s;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .tbtn:hover { color: var(--t2); background: var(--s2); }
+    .tbtn.active { background: var(--s2); color: var(--t1); border: 1px solid var(--bdr); }
+    .tpane { display: none; flex: 1; overflow-y: auto; min-height: 0; flex-direction: column; }
+    .tpane.active { display: flex; }
+
+    /* ── Log pane ── */
+    #t-logs { padding: 8px 10px; gap: 0; }
+    .lr {
+      display: flex; gap: 6px;
+      font-size: 10px; font-family: 'DM Mono', monospace;
+      line-height: 1.7; padding: 1px 0;
+    }
+    .lts { flex-shrink: 0; color: var(--t4); min-width: 88px; }
+    .ltg { flex-shrink: 0; font-weight: 600; min-width: 62px; }
+    .li  { color: var(--t2); }
+    .lok { color: #047857; }
+    .lw  { color: #92400e; }
+    .le  { color: #991b1b; }
+    .lev { color: #1e40af; }
+    .lg  { color: #5b21b6; }
+    .lau { color: #0e7490; }
+    .lm  { color: #9d174d; }
+    .lfl { color: #9a3412; }
+    .lnav{ color: #065f46; }
+
+    /* ── Transcript pane ── */
+    #t-tx { padding: 12px 13px; gap: 0; }
+    .bw { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 10px; }
+    .av {
+      flex-shrink: 0; width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700; margin-top: 2px;
+    }
+    .av.user  { background: var(--s2); border: 1px solid var(--bdr); color: var(--t3); }
+    .av.agent { background: linear-gradient(135deg, var(--acc), var(--pur)); color: #fff; }
+    .av.flash { background: linear-gradient(135deg, var(--cya), var(--acc)); color: #fff; }
+    .bb {
+      flex: 1; font-size: 11px; line-height: 1.65;
+      padding: 6px 10px;
+      border-radius: 0 var(--r2) var(--r2) var(--r2);
+    }
+    .bb.user  { background: var(--s2); border: 1px solid var(--bdr); color: var(--t2); }
+    .bb.agent { background: var(--acc-l); border: 1px solid rgba(37,99,235,.12); color: #1e40af; }
+    .bb.flash { background: var(--cya-l); border: 1px solid rgba(8,145,178,.12); color: #0e4f6f; font-size: 10px; }
+    .flash-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: linear-gradient(135deg, var(--cya), var(--acc));
+      color: #fff; border-radius: 99px; padding: 2px 8px;
+      font-size: 9px; font-weight: 700; margin-bottom: 4px;
+    }
+
+    /* ── Memory pane ── */
+    #t-mem { padding: 12px 13px; }
+    .ms { margin-bottom: 14px; }
+    .msh {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--t4);
+      margin-bottom: 6px; display: flex; align-items: center; gap: 4px;
+    }
+    .tc {
+      font-size: 10px; padding: 2px 8px;
+      border-radius: 99px; margin: 2px;
+      display: inline-block; font-weight: 500;
+    }
+    .tc.f  { background: var(--pur-l); color: #5b21b6; border: 1px solid rgba(124,58,237,.15); }
+    .tc.p  { background: var(--grn-l); color: #065f46; border: 1px solid rgba(5,150,105,.15); }
+    .tc.n  { background: var(--acc-l); color: #1e3a8a; border: 1px solid rgba(37,99,235,.15); }
+    .tc.s  { background: var(--yel-l); color: #78350f; border: 1px solid rgba(217,119,6,.15); font-size: 9px; }
+
+    /* ── Help pane ── */
+    #t-help { overflow-y: auto; padding: 12px 13px; }
+    .hg { margin-bottom: 16px; }
+    .hgh {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--t3);
+      margin-bottom: 7px; display: flex; align-items: center; gap: 4px;
+      padding-bottom: 5px; border-bottom: 1px solid var(--bdr2);
+    }
+    .eg {
+      background: var(--s2); border: 1px solid var(--bdr);
+      border-radius: var(--r2); padding: 8px 10px; margin-bottom: 4px;
+      transition: border-color .2s;
+    }
+    .eg:hover { border-color: var(--bdr); }
+    .eg-t { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 2px; font-family: 'DM Mono', monospace; }
+    .eg-s { font-size: 11px; font-style: italic; color: var(--t1); }
+    .eg-x { font-size: 9px; color: var(--t3); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+    /* ── Panels ── */
+    .po {
+      position: absolute; inset: 0;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .28s cubic-bezier(.22,.61,.36,1);
+      z-index: 100;
+    }
+    .po.open { transform: translateX(0); }
+    .ph {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 14px;
+      background: var(--s); border-bottom: 1px solid var(--bdr);
+      flex-shrink: 0;
+    }
+    .pbk {
+      width: 28px; height: 28px; border-radius: var(--r);
+      background: var(--s2); border: 1px solid var(--bdr);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--t2); transition: all .2s;
+    }
+    .pbk:hover { background: var(--bdr); color: var(--t1); }
+    .ppill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 99px;
+      background: var(--s2); border: 1px solid var(--bdr);
+      font-size: 11px; font-weight: 600; color: var(--t2);
+    }
+    .pcls {
+      margin-left: auto; width: 26px; height: 26px;
+      border-radius: var(--r); background: none; border: none;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--t3); font-size: 18px; transition: all .2s;
+    }
+    .pcls:hover { background: var(--bdr); color: var(--t1); }
+    .pbody { flex: 1; overflow-y: auto; padding: 15px 14px; }
+
+    /* ── Repository panel ── */
+    .rep-h {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 16px; font-weight: 700; letter-spacing: -.02em;
+      margin-bottom: 12px;
+    }
+    .rep-sub { font-size: 11px; color: var(--t3); margin-bottom: 10px; }
+    .cards {
+      display: flex; gap: 10px;
+      overflow-x: auto; padding-bottom: 6px; margin-bottom: 18px;
+    }
+    .cards::-webkit-scrollbar { height: 3px; }
+    .card {
+      flex-shrink: 0; width: 190px;
+      background: var(--s); border: 1px solid var(--bdr);
+      border-radius: var(--r3); padding: 13px; box-shadow: var(--sh);
+      cursor: pointer; transition: all .2s;
+    }
+    .card:hover { box-shadow: var(--sh2); border-color: rgba(59,130,246,.3); }
+    .card-t { font-size: 12px; font-weight: 700; margin-bottom: 5px; line-height: 1.35; }
+    .card-d { font-size: 10px; color: var(--t3); margin-bottom: 9px; line-height: 1.45; }
+    .card-src { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--acc); }
+    .dlh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .dlc { font-size: 11px; color: var(--t3); }
+    .di {
+      background: var(--s); border: 1px solid var(--bdr);
+      border-radius: var(--r2); padding: 12px 13px;
+      margin-bottom: 6px; box-shadow: var(--sh);
+      cursor: pointer; transition: all .15s;
+    }
+    .di:hover { box-shadow: var(--sh2); border-color: rgba(59,130,246,.25); }
+    .di-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
+    .di-t { font-size: 12px; font-weight: 600; line-height: 1.35; flex: 1; }
+    .st {
+      flex-shrink: 0; font-size: 8px; font-weight: 600;
+      padding: 2px 6px; border-radius: 99px;
+      border: 1.5px solid var(--grn); color: var(--grn);
+    }
+    .st.nb { border-color: var(--t4); color: var(--t4); }
+    .di-d { font-size: 10px; color: var(--t3); margin-bottom: 3px; line-height: 1.4; }
+    .di-m { font-size: 9px; color: var(--t4); display: flex; align-items: center; gap: 5px; }
+    .di-in { font-weight: 600; color: var(--t3); }
+    .di-meta { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+    .di-pill {
+      font-size: 8px; padding: 1px 6px;
+      border-radius: 99px; background: var(--s2);
+      border: 1px solid var(--bdr); color: var(--t3);
+    }
+    .loading { text-align: center; color: var(--t4); padding: 32px; font-size: 11px; }
+    .error-box {
+      background: var(--red-l); border: 1px solid rgba(239,68,68,.25);
+      border-radius: var(--r2); padding: 10px 13px;
+      font-size: 11px; color: var(--red); margin-bottom: 8px;
+    }
+
+    /* ── Doc preview ── */
+    .dp-tc {
+      background: var(--s); border: 1px solid var(--bdr);
+      border-radius: var(--r3); padding: 22px 18px; text-align: center;
+      margin-bottom: 12px; box-shadow: var(--sh);
+    }
+    .dp-mt { font-size: 14px; font-weight: 800; text-transform: uppercase; line-height: 1.35; margin-bottom: 11px; }
+    .dp-th { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--t3); margin-bottom: 5px; }
+    .dp-st { font-size: 12px; color: var(--t2); }
+    .dp-meta { display: flex; gap: 6px; justify-content: center; margin-top: 9px; flex-wrap: wrap; }
+    .dp-tag {
+      font-size: 9px; padding: 2px 7px; border-radius: 99px;
+      background: var(--s2); border: 1px solid var(--bdr); color: var(--t3);
+    }
+    .dc {
+      background: var(--s); border: 1px solid var(--bdr);
+      border-radius: var(--r3); padding: 16px 18px;
+      margin-bottom: 9px; box-shadow: var(--sh);
+      line-height: 1.75; font-size: 12px; color: var(--t2);
+    }
+    .dc h3 { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 9px; color: var(--t3); }
+    .dc-ch {
+      background: var(--acc); color: #fff;
+      border-radius: var(--r); padding: 2px 8px;
+      font-size: 10px; font-weight: 700;
+      display: inline-block; margin-bottom: 7px;
+    }
+    .al { list-style: none; }
+    .al li { display: flex; gap: 9px; margin-bottom: 7px; }
+    .al li .lb { font-weight: 700; flex-shrink: 0; color: var(--t1); }
+    .kwbar {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      background: var(--yel-l); border: 1px solid rgba(245,158,11,.2);
+      border-radius: var(--r2); padding: 7px 10px;
+      margin-bottom: 10px; font-size: 10px; color: var(--yel);
+    }
+    .kwc {
+      background: rgba(245,158,11,.2); border: 1px solid rgba(245,158,11,.3);
+      border-radius: 99px; padding: 2px 6px;
+      font-size: 9px; font-weight: 600; color: var(--yel);
+    }
+    mark.kw { background: var(--hl); color: #78350f; border-radius: 2px; padding: 0 2px; }
+    @keyframes kf { 0% { opacity: .4; transform: scale(1.04); } 100% { opacity: 1; transform: scale(1); } }
+    mark.kw.new { animation: kf .3s ease-out; }
+
+    /* ── Detail panel ── */
+    .det-h { font-size: 15px; font-weight: 700; margin-bottom: 4px; line-height: 1.4; letter-spacing: -.01em; }
+    .det-sub { font-size: 11px; color: var(--t3); margin-bottom: 14px; }
+    .det-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .det-card {
+      background: var(--s); border: 1px solid var(--bdr);
+      border-radius: var(--r2); padding: 10px; text-align: center; box-shadow: var(--sh);
+    }
+    .det-card .v { font-size: 24px; font-weight: 800; color: var(--acc); letter-spacing: -.02em; }
+    .det-card .l { font-size: 9px; color: var(--t3); }
+    .det-sec { margin-bottom: 14px; }
+    .det-sec-h { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--t4); margin-bottom: 5px; }
+    .det-sec-body {
+      background: var(--s); border: 1px solid var(--bdr);
+      border-radius: var(--r2); padding: 11px 13px;
+      font-size: 11px; line-height: 1.7; color: var(--t2);
+    }
+    .det-rel { display: flex; flex-direction: column; gap: 4px; }
+    .det-rel-item {
+      font-size: 10px; padding: 4px 9px;
+      border-radius: var(--r); background: var(--s2);
+      border: 1px solid var(--bdr); color: var(--t2);
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sb">
+  <div class="sb-hd">
+    <div class="logo">
+      <div class="logo-ic"><iconify-icon icon="lucide:scale" width="15" height="15"></iconify-icon></div>
+      <div>
+        <div class="logo-t">Legalitik</div>
+        <div class="logo-s">v22.4 · RAG + Flash</div>
+      </div>
+    </div>
+    <div class="cpill" id="cpill">
+      <span class="dot"></span>
+      <span id="ctxt">Offline</span>
+    </div>
+  </div>
+
+  <div class="mic-a">
+    <div class="mic-w" id="mw">
+      <span class="ring ra"></span>
+      <span class="ring rb"></span>
+      <button id="mbtn">
+        <iconify-icon id="bico" icon="lucide:mic" width="26" height="26"></iconify-icon>
+      </button>
+    </div>
+    <p id="slbl">Tap to start</p>
+    <div class="waves">
+      <div class="wb" id="wb1"></div><div class="wb" id="wb2"></div>
+      <div class="wb" id="wb3"></div><div class="wb" id="wb4"></div><div class="wb" id="wb5"></div>
+    </div>
+    <div class="lctrl" id="lctrl">
+      <button class="lbtn" id="mutebtn">
+        <iconify-icon id="muteico" icon="lucide:mic" width="11" height="11"></iconify-icon>
+        <span id="mutelbl">Mute</span>
+      </button>
+      <button class="endbtn" id="endbtn">
+        <iconify-icon icon="lucide:phone-off" width="11" height="11"></iconify-icon>End
+      </button>
+    </div>
+  </div>
+
+  <div class="ctx-b" id="ctx-b">
+    <iconify-icon id="ctx-ico" icon="lucide:home" width="9" height="9"></iconify-icon>
+    <span id="ctx-txt">Home</span>
+  </div>
+
+  <div class="sb-s">
+    <div class="sb-sh">
+      <div class="sb-sh-l"><iconify-icon icon="lucide:activity" width="9" height="9"></iconify-icon>Session</div>
+    </div>
+    <div class="sg">
+      <div class="sc"><div class="v" id="st-t">0</div><div class="l">Turns</div></div>
+      <div class="sc"><div class="v" id="st-n">0</div><div class="l">Navigations</div></div>
+    </div>
+  </div>
+
+  <div class="sb-s">
+    <div class="sb-sh">
+      <div class="sb-sh-l">
+        <iconify-icon icon="lucide:brain" width="9" height="9"></iconify-icon>Memory
+        <span id="msav" style="display:none;font-size:8px;color:var(--yel);">saving…</span>
+      </div>
+      <button class="clrbtn" id="clrmem">Clear</button>
+    </div>
+    <div id="ntag" style="display:none;" class="ntag">
+      <iconify-icon icon="lucide:user" width="10" height="10"></iconify-icon>
+      <span id="nval"></span>
+    </div>
+    <div class="mg">
+      <div class="mc f"><div class="v" id="m-f">0</div><div class="l">Facts</div></div>
+      <div class="mc p"><div class="v" id="m-p">0</div><div class="l">Prefs</div></div>
+      <div class="mc ss"><div class="v" id="m-s">0</div><div class="l">Sessions</div></div>
+    </div>
+    <details>
+      <summary><iconify-icon icon="lucide:chevron-right" width="10" height="10"></iconify-icon>View memories</summary>
+      <div class="ml" id="mlist"></div>
+    </details>
+  </div>
+
+  <div class="sb-s">
+    <div class="sb-sh">
+      <div class="sb-sh-l"><iconify-icon icon="lucide:mic" width="9" height="9"></iconify-icon>Microphone</div>
+    </div>
+    <select class="mic-sel" id="micsel">
+      <option value="" disabled selected>Select microphone…</option>
+    </select>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main id="main">
+  <div id="dv">
+    <div class="tbar">
+      <button class="tbtn active" data-tab="logs">
+        <iconify-icon icon="lucide:terminal" width="10" height="10"></iconify-icon>
+        Logs <span id="lcnt" style="font-size:8px;color:var(--t4);margin-left:1px;">0</span>
+      </button>
+      <button class="tbtn" data-tab="tx">
+        <iconify-icon icon="lucide:message-circle" width="10" height="10"></iconify-icon>
+        Transcript
+      </button>
+      <button class="tbtn" data-tab="mem">
+        <iconify-icon icon="lucide:database" width="10" height="10"></iconify-icon>
+        Memory <span id="mbadge" style="font-size:8px;color:var(--pur);margin-left:1px;">0</span>
+      </button>
+      <button class="tbtn" data-tab="help">
+        <iconify-icon icon="lucide:help-circle" width="10" height="10"></iconify-icon>
+        Help
+      </button>
+      <div style="flex:1;"></div>
+      <button id="clrlg" style="font-size:9px;color:var(--t4);background:none;border:none;padding:4px 6px;border-radius:4px;transition:all .2s;" onmouseover="this.style.color='var(--t2)'" onmouseout="this.style.color='var(--t4)'">Clear</button>
+    </div>
+    <div id="t-logs" class="tpane active"></div>
+    <div id="t-tx"   class="tpane"></div>
+    <div id="t-mem"  class="tpane"></div>
+    <div id="t-help" class="tpane"></div>
+  </div>
+
+  <!-- Repository Panel -->
+  <div class="po" id="p-repo">
+    <div class="ph">
+      <button class="pbk" onclick="PM.close()"><iconify-icon icon="lucide:arrow-left" width="13" height="13"></iconify-icon></button>
+      <div class="ppill"><iconify-icon icon="lucide:database" width="12" height="12"></iconify-icon>Repository</div>
+      <button class="pcls" onclick="PM.close()">×</button>
+    </div>
+    <div class="pbody" id="repo-body"></div>
+  </div>
+
+  <!-- Document Preview Panel -->
+  <div class="po" id="p-doc">
+    <div class="ph">
+      <button class="pbk" onclick="PM.backToRepo()"><iconify-icon icon="lucide:arrow-left" width="13" height="13"></iconify-icon></button>
+      <div class="ppill"><iconify-icon icon="lucide:file-text" width="12" height="12"></iconify-icon>Dokumen</div>
+      <button class="pcls" onclick="PM.close()">×</button>
+    </div>
+    <div class="pbody" id="doc-body"></div>
+  </div>
+
+  <!-- Detail Panel -->
+  <div class="po" id="p-detail">
+    <div class="ph">
+      <button class="pbk" onclick="PM.backToRepo()"><iconify-icon icon="lucide:arrow-left" width="13" height="13"></iconify-icon></button>
+      <div class="ppill"><iconify-icon icon="lucide:info" width="12" height="12"></iconify-icon>Detail Peraturan</div>
+      <button class="pcls" onclick="PM.close()">×</button>
+    </div>
+    <div class="pbody" id="detail-body"></div>
+  </div>
+</main>
+
+<script>
+"use strict";
+
+// ── Logger ────────────────────────────────────────────────────────────────────
+const Logger = (() => {
+  const pane = document.getElementById('t-logs');
+  const cnt  = document.getElementById('lcnt');
+  let n = 0;
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const cls = {
+    info:'li', ok:'lok', warn:'lw', error:'le', event:'lev',
+    gemini:'lg', audio:'lau', memory:'lm', flash:'lfl', nav:'lnav',
+    debug:'li'
+  };
+  return {
+    log(lv, tag, msg) {
+      const now = new Date();
+      const ts  = now.toTimeString().slice(0,8)+'.'+String(now.getMilliseconds()).padStart(3,'0');
+      const c   = cls[lv] || 'li';
+      const d   = document.createElement('div'); d.className = 'lr';
+      d.innerHTML = `<span class="lts">${ts}</span><span class="ltg ${c}">[${esc(tag)}]</span><span class="${c}">${esc(msg)}</span>`;
+      pane.appendChild(d);
+      pane.scrollTop = pane.scrollHeight;
+      cnt.textContent = String(++n);
+    },
+    clear() { pane.innerHTML = ''; n = 0; cnt.textContent = '0'; }
+  };
+})();
+
+// ── Transcript ────────────────────────────────────────────────────────────────
+const TX = (() => {
+  const p = document.getElementById('t-tx');
+  return {
+    add(role, text) {
+      const w = document.createElement('div'); w.className = 'bw';
+      const a = document.createElement('div'); a.className = `av ${role}`;
+      a.textContent = role === 'user' ? 'U' : 'G';
+      const b = document.createElement('div'); b.className = `bb ${role}`;
+      b.textContent = text;
+      w.appendChild(a); w.appendChild(b);
+      p.appendChild(w); p.scrollTop = p.scrollHeight;
+    },
+    addFlash(data) {
+      const w = document.createElement('div'); w.className = 'bw';
+      const a = document.createElement('div'); a.className = 'av flash'; a.textContent = '⚡';
+      const b = document.createElement('div'); b.className = 'bb flash';
+      const intent = data.intent || '?';
+      const intentColor = {
+        fetch_news:'var(--cya)', open_repository:'var(--acc)',
+        regulation_query:'var(--grn)', preview_document:'var(--pur)',
+        chitchat:'var(--t3)', close_panel:'var(--t4)', back_to_repository:'var(--t4)',
+        highlight_keywords:'var(--yel)',
+      }[intent] || 'var(--acc)';
+      b.innerHTML = `
+        <span class="flash-badge"><iconify-icon icon="lucide:zap" width="10" height="10"></iconify-icon>
+          <span style="color:${intentColor}">${intent}</span>
+        </span>
+        <div style="margin-top:3px;"><b>Rec:</b> "${data.reconstructed || ''}"</div>
+        ${(data.keywords_id||[]).length ? `<div><b>ID:</b> ${data.keywords_id.join(', ')}</div>` : ''}
+        ${(data.keywords_en||[]).length ? `<div><b>EN:</b> ${data.keywords_en.join(', ')}</div>` : ''}
+        ${data.search_query ? `<div><b>SQ:</b> "${data.search_query}"</div>` : ''}
+        ${data.instansi ? `<div><b>Instansi:</b> ${data.instansi}</div>` : ''}
+        ${data.tahun ? `<div><b>Tahun:</b> ${data.tahun}</div>` : ''}
+        ${data.document_name ? `<div><b>Doc:</b> ${data.document_name}</div>` : ''}
+        ${data.reasoning ? `<div style="color:var(--t3);font-size:9px;margin-top:2px;">${data.reasoning}</div>` : ''}`;
+      w.appendChild(a); w.appendChild(b);
+      p.appendChild(w); p.scrollTop = p.scrollHeight;
+    }
+  };
+})();
+
+// ── Memory ────────────────────────────────────────────────────────────────────
+const Mem = (() => {
+  const mF  = document.getElementById('m-f'),
+        mP  = document.getElementById('m-p'),
+        mS  = document.getElementById('m-s');
+  const ml  = document.getElementById('mlist'),
+        mb  = document.getElementById('mbadge');
+  const msav = document.getElementById('msav'),
+        mt  = document.getElementById('t-mem');
+  const nt  = document.getElementById('ntag'),
+        nv  = document.getElementById('nval');
+
+  function _mi(c,t){const d=document.createElement('div');d.className=`mi ${c}`;d.textContent=t;return d;}
+  function _tc(c,t){const s=document.createElement('span');s.className=`tc ${c}`;s.textContent=t;return s;}
+  function _h(ic,ti){
+    const d=document.createElement('div');d.className='msh';
+    d.innerHTML=`<iconify-icon icon="${ic}" width="11" height="11"></iconify-icon>${ti}`;
+    return d;
+  }
+
+  return {
+    update(lt, st, stats) {
+      mF.textContent = String(stats.facts       || 0);
+      mP.textContent = String(stats.preferences || 0);
+      mS.textContent = String(stats.sessions    || 0);
+      mb.textContent = String((stats.facts||0) + (stats.preferences||0) + (stats.legal_names||0));
+
+      const nm = lt.user_name || '';
+      if (nm) { nt.style.display = 'inline-flex'; nv.textContent = nm; }
+      else    { nt.style.display = 'none'; }
+
+      ml.innerHTML = '';
+      (lt.facts||[]).slice(-4).forEach(f => ml.appendChild(_mi('f', '📌 '+f)));
+      (lt.preferences||[]).slice(-2).forEach(p => ml.appendChild(_mi('p', '♥ '+p)));
+      (lt.legal_names||[]).slice(-3).forEach(n => ml.appendChild(_mi('n', '⚖ '+n)));
+
+      mt.innerHTML = '';
+      if (nm) {
+        const w=document.createElement('div');w.className='ms';
+        w.appendChild(_h('lucide:user','User'));w.appendChild(_tc('f',nm));mt.appendChild(w);
+      }
+      if ((lt.facts||[]).length) {
+        const w=document.createElement('div');w.className='ms';
+        w.appendChild(_h('lucide:bookmark','Facts'));
+        lt.facts.forEach(f=>w.appendChild(_tc('f',f)));mt.appendChild(w);
+      }
+      if ((lt.preferences||[]).length) {
+        const w=document.createElement('div');w.className='ms';
+        w.appendChild(_h('lucide:heart','Preferences'));
+        lt.preferences.forEach(p=>w.appendChild(_tc('p',p)));mt.appendChild(w);
+      }
+      if ((lt.legal_names||[]).length) {
+        const w=document.createElement('div');w.className='ms';
+        w.appendChild(_h('lucide:file-text','Documents'));
+        lt.legal_names.forEach(n=>w.appendChild(_tc('n',n)));mt.appendChild(w);
+      }
+      if ((lt.summaries||[]).length) {
+        const w=document.createElement('div');w.className='ms';
+        w.appendChild(_h('lucide:list','Sessions'));
+        [...lt.summaries].reverse().forEach((s,i) => {
+          w.appendChild(_tc('s',`[${lt.summaries.length-i}] `+s));
+        });
+        mt.appendChild(w);
+      }
+      if (!lt.facts?.length && !lt.preferences?.length && !lt.legal_names?.length) {
+        const e=document.createElement('div');
+        e.style.cssText='font-size:11px;color:var(--t4);padding:16px 0;text-align:center;';
+        e.textContent='No memories yet.';mt.appendChild(e);
+      }
+    },
+    setSaving(on) { msav.style.display = on ? 'inline' : 'none'; },
+    async fetch() {
+      try {
+        const r = await fetch('/memory');
+        const d = await r.json();
+        this.update(d.long_term||{}, d.short_term||[], d.stats||{});
+      } catch {}
+    },
+    async clear() {
+      if (!confirm('Clear all long-term memory?')) return;
+      try {
+        const r = await fetch('/memory/clear', {method:'POST'});
+        const d = await r.json();
+        this.update(d.snapshot.long_term, d.snapshot.short_term, d.snapshot.stats);
+      } catch { Logger.log('error','MEM','Clear failed'); }
+    }
+  };
+})();
+
+// ── Context tracker ───────────────────────────────────────────────────────────
+const CT = (() => {
+  let page = 'home';
+  const b=document.getElementById('ctx-b'),
+        t=document.getElementById('ctx-txt'),
+        i=document.getElementById('ctx-ico');
+  const cfg = {
+    home:       { icon:'lucide:home',      label:'Home'       },
+    repository: { icon:'lucide:database',  label:'Repository' },
+    docpreview: { icon:'lucide:file-text', label:'Dokumen'    },
+    detail:     { icon:'lucide:info',      label:'Detail'     },
+  };
+  return {
+    get() { return page; },
+    set(p) {
+      page = p;
+      b.className = 'ctx-b '+(p!=='home' ? p : '');
+      const c = cfg[p] || cfg.home;
+      i.setAttribute('icon', c.icon);
+      t.textContent = c.label;
+    }
+  };
+})();
+
+// ── Panel Manager ─────────────────────────────────────────────────────────────
+const PM = (() => {
+  let cur = null;
+  const panels = {
+    repository: document.getElementById('p-repo'),
+    docpreview: document.getElementById('p-doc'),
+    detail:     document.getElementById('p-detail'),
+  };
+  return {
+    open(n) {
+      if (cur && panels[cur]) panels[cur].classList.remove('open');
+      if (panels[n]) { panels[n].classList.add('open'); cur = n; }
+      CT.set(n || 'home');
+      SM.send({type:'page_update', page: n || 'home'});
+    },
+    close() {
+      if (cur && panels[cur]) panels[cur].classList.remove('open');
+      cur = null; CT.set('home'); SM.send({type:'page_update', page:'home'});
+    },
+    backToRepo() {
+      Object.values(panels).forEach(p => p && p.classList.remove('open'));
+      if (panels.repository) panels.repository.classList.add('open');
+      cur = 'repository'; CT.set('repository'); SM.send({type:'page_update', page:'repository'});
+    },
+    current() { return cur; }
+  };
+})();
+
+// ── Highlight helper ──────────────────────────────────────────────────────────
+function hlText(t, kw, isNew=false) {
+  if (!kw || !kw.length) return t;
+  const cls = 'kw' + (isNew ? ' new' : '');
+  const re  = new RegExp(`(${kw.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')})`, 'gi');
+  return String(t||'').replace(re, `<mark class="${cls}">$1</mark>`);
+}
+
+// ── Repository Panel ──────────────────────────────────────────────────────────
+const RepoPanel = (() => {
+  const body = document.getElementById('repo-body');
+
+  function _card(doc) {
+    const c = document.createElement('div'); c.className = 'card';
+    c.innerHTML = `<div class="card-t">${doc.title||'—'}</div>
+      <div class="card-d">${doc.about||'—'}</div>
+      <div class="card-src">${doc.source||''}</div>`;
+    c.onclick = () => { SM.send({type:'page_update', page:'docpreview'}); };
+    return c;
+  }
+
+  function _docItem(doc, kw) {
+    const d = document.createElement('div'); d.className = 'di';
+    d.innerHTML = `
+      <div class="di-top">
+        <div class="di-t">${hlText(doc.title, kw)}</div>
+        <div class="st ${doc.status && doc.status!=='-' ? '' : 'nb'}">${doc.status && doc.status!=='-' ? doc.status : '—'}</div>
+      </div>
+      <div class="di-d">${hlText(doc.snippet||doc.title, kw)}</div>
+      <div class="di-m">
+        <span class="di-in">${doc.source||'—'}</span><span>·</span><span>${doc.formattedDate||doc.rawDate||'—'}</span>
+      </div>
+      <div class="di-meta">
+        ${doc.metadata?.total_chapter ? `<span class="di-pill">${doc.metadata.total_chapter} Bab</span>` : ''}
+        ${doc.metadata?.total_section ? `<span class="di-pill">${doc.metadata.total_section} Pasal</span>` : ''}
+        ${doc.metadata?.total_verse   ? `<span class="di-pill">${doc.metadata.total_verse} Ayat</span>` : ''}
+      </div>`;
+    d.onclick = () => DocPanel.openByKind2(doc.kind2, kw);
+    return d;
+  }
+
+  return {
+    render(msg) {
+      const { documents=[], newest=[], query='', total=0 } = msg;
+      const kw = (documents[0]?.keywords || []).map(k => k.toLowerCase());
+      body.innerHTML = '';
+
+      const h = document.createElement('div'); h.className = 'rep-h';
+      h.innerHTML = `<iconify-icon icon="lucide:database" width="16" height="16" style="color:var(--acc)"></iconify-icon>Repositori Legal`;
+      body.appendChild(h);
+
+      if (newest && newest.length) {
+        const rw = document.createElement('div');
+        rw.style.cssText = 'background:var(--s);border:1px solid var(--bdr);border-radius:var(--r3);padding:13px 13px 5px;margin-bottom:16px;box-shadow:var(--sh);';
+        rw.innerHTML = `<div style="font-size:14px;font-weight:700;margin-bottom:3px;letter-spacing:-.01em;">Peraturan Terbaru</div>
+          <div class="rep-sub">${newest.length} dokumen terbaru ditambahkan.</div>`;
+        const cw = document.createElement('div'); cw.className = 'cards';
+        newest.forEach(n => cw.appendChild(_card(n)));
+        rw.appendChild(cw); body.appendChild(rw);
+      }
+
+      const dlh = document.createElement('div'); dlh.className = 'dlh';
+      dlh.innerHTML = `<span class="dlc">${total} dokumen${query ? ` untuk "<strong>${query}</strong>"` : ''}.</span>`;
+      body.appendChild(dlh);
+
+      if (!documents.length) {
+        const e = document.createElement('div'); e.className = 'loading';
+        e.textContent = 'Tidak ada dokumen ditemukan.';
+        body.appendChild(e);
+      } else {
+        documents.forEach(doc => body.appendChild(_docItem(doc, kw)));
+      }
+
+      PM.open('repository');
+      Logger.log('nav','REPO', `query:"${query}" docs:${total}`);
+    }
+  };
+})();
+
+// ── Doc Panel ─────────────────────────────────────────────────────────────────
+const DocPanel = (() => {
+  const body = document.getElementById('doc-body');
+  let _currentStructure = [], _currentKw = [];
+
+  function _renderStructure(structure, kw, isNew=false) {
+    body.innerHTML = '';
+
+    if (kw && kw.length) {
+      const bar = document.createElement('div'); bar.className = 'kwbar';
+      bar.innerHTML = `<iconify-icon icon="lucide:search" width="12" height="12"></iconify-icon><span>Keywords:</span>`;
+      kw.forEach(k => { const c=document.createElement('span'); c.className='kwc'; c.textContent=k; bar.appendChild(c); });
+      body.appendChild(bar);
+    }
+
+    structure.forEach(node => {
+      if (node.type === 'header') {
+        let card = document.getElementById('dp-titlecard');
+        if (!card) {
+          card = document.createElement('div'); card.className = 'dp-tc'; card.id = 'dp-titlecard';
+          body.appendChild(card);
+        }
+        if (node.subtype === 'title') {
+          const h = document.createElement('div'); h.className = 'dp-mt';
+          h.innerHTML = hlText(node.content, kw, isNew); card.appendChild(h);
+        } else if (node.subtype === 'about') {
+          const th = document.createElement('div'); th.className = 'dp-th'; th.textContent = 'TENTANG';
+          const st = document.createElement('div'); st.className = 'dp-st';
+          st.innerHTML = hlText(node.content, kw, isNew);
+          card.appendChild(th); card.appendChild(st);
+        }
+      } else if (node.type === 'preamble') {
+        const dc = document.createElement('div'); dc.className = 'dc';
+        const h = document.createElement('h3'); h.textContent = node.label || ''; dc.appendChild(h);
+        if (node.contents && node.contents.length) {
+          const ul = document.createElement('ul'); ul.className = 'al';
+          node.contents.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="lb">${item.point||''}.</span><span>${hlText(item.content,kw,isNew)}</span>`;
+            ul.appendChild(li);
+          });
+          dc.appendChild(ul);
+        } else {
+          const p = document.createElement('p'); p.innerHTML = hlText(node.content||'',kw,isNew); dc.appendChild(p);
+        }
+        body.appendChild(dc);
+      } else if (node.type === 'body') {
+        const dc = document.createElement('div'); dc.className = 'dc';
+        const badge = document.createElement('div'); badge.className = 'dc-ch';
+        badge.textContent = `BAB ${node.chapter_number||''} — ${node.chapter_title||''}`;
+        dc.appendChild(badge);
+        (node.sections||[]).forEach(sec => {
+          const ph = document.createElement('div');
+          ph.style.cssText = 'font-size:11px;font-weight:700;margin:8px 0 4px;color:var(--t1);';
+          ph.textContent = `Pasal ${sec.number||''}`;
+          dc.appendChild(ph);
+          (sec.contents||[]).forEach(verse => {
+            const vd = document.createElement('div');
+            vd.style.cssText = 'margin-bottom:4px;line-height:1.75;font-size:12px;';
+            const point = verse.point ? `<span style="font-weight:700;margin-right:6px;color:var(--t1);">(${verse.point})</span>` : '';
+            vd.innerHTML = point + hlText(verse.content||'', kw, isNew);
+            dc.appendChild(vd);
+          });
+        });
+        body.appendChild(dc);
+      }
+    });
+
+    const tip = document.createElement('div');
+    tip.style.cssText = 'font-size:10px;color:var(--t4);text-align:center;padding:8px;font-family:"DM Mono",monospace;';
+    tip.innerHTML = `<iconify-icon icon="lucide:info" width="11" height="11" style="vertical-align:middle;margin-right:3px;"></iconify-icon>Ucapkan "cari kata [X]" untuk menyorot kata kunci.`;
+    body.appendChild(tip);
+  }
+
+  return {
+    render(msg) {
+      const { metadata={}, structure=[], kind2='' } = msg;
+      _currentStructure = structure; _currentKw = [];
+      _renderStructure(structure, []);
+      PM.open('docpreview');
+      Logger.log('nav','DOC', `kind2:"${kind2}" chapters:${metadata.total_chapters}`);
+    },
+    highlight(newKw) {
+      const kw = newKw.map(k => k.toLowerCase()).filter(Boolean);
+      if (!kw.length) return;
+      _currentKw = kw;
+      _renderStructure(_currentStructure, kw, true);
+      setTimeout(() => {
+        const f = body.querySelector('mark.kw');
+        if (f) f.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 80);
+      Logger.log('nav','HL', `kw:${JSON.stringify(kw)}`);
+    },
+    openByKind2(kind2, kw) {
+      body.innerHTML = `<div class="loading">
+        <iconify-icon icon="lucide:loader" width="20" height="20" style="animation:spin 1s linear infinite;display:block;margin:0 auto 8px;"></iconify-icon>
+        Memuat dokumen…</div>`;
+      PM.open('docpreview');
+      Logger.log('info','DOC', `Requesting kind2:"${kind2}"`);
+      SM.send({type:'request_doc', kind2, kw});
+    }
+  };
+})();
+
+// ── Detail Panel ──────────────────────────────────────────────────────────────
+const DetailPanel = (() => {
+  const body = document.getElementById('detail-body');
+  return {
+    render(data) {
+      body.innerHTML = '';
+      const h   = document.createElement('div'); h.className = 'det-h'; h.textContent = data.kind2 || '';
+      const sub = document.createElement('div'); sub.className = 'det-sub'; sub.textContent = data.judul || '';
+      body.appendChild(h); body.appendChild(sub);
+
+      const grid = document.createElement('div'); grid.className = 'det-grid';
+      [{v:data.total_bab,l:'Bab'},{v:data.total_pasal,l:'Pasal'},{v:data.total_ayat,l:'Ayat'}].forEach(({v,l}) => {
+        const c = document.createElement('div'); c.className = 'det-card';
+        c.innerHTML = `<div class="v">${v||0}</div><div class="l">${l}</div>`;
+        grid.appendChild(c);
+      });
+      body.appendChild(grid);
+
+      [{key:'summary',label:'Ringkasan'},{key:'summary_ruang_lingkup',label:'Ruang Lingkup'},
+       {key:'summary_tujuan',label:'Tujuan'},{key:'summary_tambahan',label:'Tambahan'}].forEach(({key,label}) => {
+        if (!data[key]) return;
+        const sec = document.createElement('div'); sec.className = 'det-sec';
+        sec.innerHTML = `<div class="det-sec-h">${label}</div><div class="det-sec-body">${data[key]}</div>`;
+        body.appendChild(sec);
+      });
+
+      const rels = [];
+      (data.status_detail?.mencabut    ||[]).forEach(r => rels.push({type:'Mencabut',    name:r}));
+      (data.status_detail?.melaksanakan||[]).forEach(r => rels.push({type:'Melaksanakan',name:r}));
+      if (rels.length) {
+        const sec = document.createElement('div'); sec.className = 'det-sec';
+        sec.innerHTML = `<div class="det-sec-h">Relasi Peraturan</div>`;
+        const rel = document.createElement('div'); rel.className = 'det-rel';
+        rels.forEach(r => {
+          const item = document.createElement('div'); item.className = 'det-rel-item';
+          item.textContent = `[${r.type}] ${r.name}`; rel.appendChild(item);
+        });
+        sec.appendChild(rel); body.appendChild(sec);
+      }
+
+      PM.open('detail');
+      Logger.log('nav','DET', `kind2:"${data.kind2}"`);
+    }
+  };
+})();
+
+// ── News Panel ────────────────────────────────────────────────────────────────
+const NewsPanel = (() => ({
+  render(m) {
+    const articles = m.articles || [];
+    const query    = m.query || '';
+    const total    = m.total || articles.length;
+    const source   = m.source || '';
+
+    PM.open('repository');
+    const body = document.getElementById('repo-body');
+    if (!body) return;
+    body.innerHTML = '';
+
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'margin-bottom:14px;';
+    hdr.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <iconify-icon icon="lucide:newspaper" width="16" style="color:var(--cya)"></iconify-icon>
+        <div style="font-size:15px;font-weight:700;letter-spacing:-.01em;">Berita Hukum &amp; Keuangan</div>
+      </div>
+      <div style="font-size:11px;color:var(--t3);">${total} artikel · topik: "${query}"${source?' · via '+source:''}</div>`;
+    body.appendChild(hdr);
+
+    if (!articles.length) {
+      const e = document.createElement('div'); e.className = 'loading';
+      e.textContent = 'Tidak ada berita ditemukan.';
+      body.appendChild(e); return;
+    }
+
+    const list = document.createElement('div');
+    list.style.cssText = 'display:flex;flex-direction:column;gap:7px;';
+
+    articles.forEach((art, i) => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:var(--s);border:1px solid var(--bdr);border-radius:var(--r2);padding:11px 13px;cursor:pointer;transition:all .2s;';
+      card.onmouseenter = () => { card.style.borderColor = 'rgba(6,182,212,.3)'; card.style.boxShadow = 'var(--sh2)'; };
+      card.onmouseleave = () => { card.style.borderColor = 'var(--bdr)';          card.style.boxShadow = ''; };
+
+      const title   = art.title   || '(Tanpa Judul)';
+      const snippet = art.snippet || '';
+      const src2    = art.source  || '';
+      const pub     = art.published ? art.published.substring(0,10) : '';
+      const url     = art.url     || '#';
+
+      card.innerHTML = `
+        <div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px;line-height:1.4;">${i+1}. ${title}</div>
+        ${snippet ? `<div style="font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:7px;">${snippet.substring(0,200)}${snippet.length>200?'…':''}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:8px;font-size:10px;color:var(--t3);">
+          ${src2 ? `<span style="background:var(--cya-l);color:var(--cya);padding:1px 7px;border-radius:99px;font-weight:600;font-size:9px;">${src2}</span>` : ''}
+          ${pub  ? `<span>${pub}</span>` : ''}
+          ${url && url !== '#' ? `<a href="${url}" target="_blank" rel="noopener" style="margin-left:auto;color:var(--acc);text-decoration:none;font-size:10px;">Baca →</a>` : ''}
+        </div>`;
+
+      if (url && url !== '#') {
+        card.onclick = (e) => { if (e.target.tagName !== 'A') window.open(url, '_blank', 'noopener'); };
+      }
+      list.appendChild(card);
+    });
+    body.appendChild(list);
+    Logger.log('nav','NEWS', `Showing ${total} articles for "${query}"`);
+  }
+}))();
+
+// ── VoiceUI ───────────────────────────────────────────────────────────────────
+const VUI = (() => {
+  const mb = document.getElementById('mbtn'),
+        bi = document.getElementById('bico'),
+        sl = document.getElementById('slbl');
+  const lc = document.getElementById('lctrl'),
+        mw = document.getElementById('mw');
+  const wb = document.querySelectorAll('.wb');
+  const cp = document.getElementById('cpill'),
+        ct = document.getElementById('ctxt');
+  const mu = document.getElementById('mutebtn'),
+        mi = document.getElementById('muteico'),
+        ml = document.getElementById('mutelbl');
+  const st = document.getElementById('st-t');
+  return {
+    setConn(on) {
+      if (on) { cp.classList.add('on'); ct.textContent = 'Connected'; }
+      else    { cp.classList.remove('on'); ct.textContent = 'Offline'; }
+    },
+    setLive(on) {
+      mb.style.display = on ? 'none' : 'flex';
+      lc.classList.toggle('show', on);
+      mw.classList.toggle('live', on);
+      wb.forEach(b => b.classList.toggle('on', on));
+      sl.className = on ? 'live' : '';
+      sl.textContent = on ? '● Live' : 'Tap to start';
+    },
+    setSpeaking(on) {
+      if (on) {
+        mb.classList.add('spk');
+        bi.setAttribute('icon','lucide:volume-2');
+        sl.textContent = '● Berbicara…'; sl.className = 'spk';
+      } else {
+        mb.classList.remove('spk');
+        bi.setAttribute('icon','lucide:mic');
+        if (document.querySelector('.lctrl.show')) { sl.textContent = '● Live'; sl.className = 'live'; }
+      }
+    },
+    setClassifying(on) {
+      if (on) { mb.classList.add('cls'); sl.textContent = '⚡ Klasifikasi…'; sl.className = 'cls'; }
+      else    { mb.classList.remove('cls'); }
+    },
+    setFetchingRAG(on) {
+      if (on) { mb.classList.add('rag'); sl.textContent = '🔍 Mengambil data…'; sl.className = 'rag'; }
+      else    { mb.classList.remove('rag'); }
+    },
+    setTurns(n) { st.textContent = String(n); },
+    setMute(on) {
+      if (on) { mu.classList.add('muted'); mi.setAttribute('icon','lucide:mic-off'); ml.textContent = 'Unmute'; }
+      else    { mu.classList.remove('muted'); mi.setAttribute('icon','lucide:mic');  ml.textContent = 'Mute'; }
+    }
+  };
+})();
+
+// ── Audio Player ──────────────────────────────────────────────────────────────
+const AP = (() => {
+  let actx = null, nextT = 0;
+  const srcs = [];
+  function b64f(b) {
+    const bin = atob(b), by = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) by[i] = bin.charCodeAt(i);
+    const i16 = new Int16Array(by.buffer), f = new Float32Array(i16.length);
+    for (let i = 0; i < i16.length; i++) f[i] = i16[i] / 32768;
+    return f;
+  }
+  function ens() {
+    if (!actx || actx.state === 'closed') {
+      actx = new (window.AudioContext||window.webkitAudioContext)({sampleRate:24000, latencyHint:'interactive'});
+      nextT = actx.currentTime;
+    }
+    if (actx.state === 'suspended') actx.resume();
+  }
+  return {
+    sched(b) {
+      ens();
+      const f   = b64f(b);
+      const buf = actx.createBuffer(1, f.length, 24000);
+      buf.copyToChannel(f, 0);
+      const s = actx.createBufferSource(); s.buffer = buf; s.connect(actx.destination);
+      srcs.push(s);
+      s.onended = () => { const i = srcs.indexOf(s); if (i > -1) srcs.splice(i,1); };
+      const now = actx.currentTime;
+      if (nextT < now + 0.005) nextT = now + 0.020;
+      s.start(nextT); nextT += buf.duration;
+    },
+    flush() {
+      srcs.forEach(s => { try { s.stop(); s.disconnect(); } catch {} });
+      srcs.length = 0;
+      if (actx) nextT = actx.currentTime;
+    },
+    close() {
+      srcs.forEach(s => { try { s.stop(); s.disconnect(); } catch {} });
+      srcs.length = 0;
+      if (actx) { actx.close().catch(()=>{}); actx = null; nextT = 0; }
+    },
+    tail() { return actx ? Math.max(0, (nextT - actx.currentTime) * 1000) : 0; }
+  };
+})();
+
+// ── Mic Recorder ──────────────────────────────────────────────────────────────
+const MR = (() => {
+  let ms=null, ma=null, msrc=null, mwl=null, ok=false, fn=null;
+  return {
+    async start(dev, cb) {
+      fn = cb;
+      ms = await navigator.mediaDevices.getUserMedia({
+        audio: { deviceId: dev ? {exact:dev} : undefined,
+                 echoCancellation:true, noiseSuppression:true, autoGainControl:true, sampleRate:16000 }
+      });
+      ma = new AudioContext({sampleRate:16000});
+      msrc = ma.createMediaStreamSource(ms);
+      const code = `class R extends AudioWorkletProcessor{buf=new Int16Array(800);idx=0;process(i){if(!i[0].length)return true;const f=i[0][0];for(let j=0;j<f.length;j++){this.buf[this.idx++]=Math.max(-32768,Math.min(32767,f[j]*32768|0));if(this.idx>=this.buf.length){this.port.postMessage(this.buf.slice(0,this.idx).buffer,[this.buf.slice(0,this.idx).buffer]);this.buf=new Int16Array(128);this.idx=0;}}return true;}}registerProcessor('gr',R);`;
+      const bl = new Blob([code], {type:'application/javascript'});
+      await ma.audioWorklet.addModule(URL.createObjectURL(bl));
+      mwl = new AudioWorkletNode(ma, 'gr'); ok = false;
+      setTimeout(() => { ok = true; Logger.log('ok','MIC','Streaming'); }, 50);
+      mwl.port.onmessage = (e) => {
+        if (!ok || !fn) return;
+        const b = new Uint8Array(e.data);
+        const base64 = btoa(b.reduce((d,byte) => d + String.fromCharCode(byte), ''));
+        fn(base64);
+      };
+      msrc.connect(mwl);
+    },
+    stop() {
+      ok=false; fn=null;
+      if (mwl)  { mwl.disconnect();  mwl=null; }
+      if (msrc) { msrc.disconnect(); msrc=null; }
+      if (ms)   { ms.getTracks().forEach(t=>t.stop()); ms=null; }
+      if (ma)   { ma.close(); ma=null; }
+    },
+    setMuted(on) { if (ms) ms.getAudioTracks().forEach(t => t.enabled = !on); }
+  };
+})();
+
+// ── Socket Manager ────────────────────────────────────────────────────────────
+const SM = (() => {
+  let ws = null, cb = null;
+  return {
+    connect(onMsg) {
+      cb = onMsg;
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      ws = new WebSocket(`${proto}://${location.host}/ws`);
+      ws.onopen  = () => Logger.log('ok',  'WS', 'Connected');
+      ws.onerror = () => Logger.log('error','WS', 'Error');
+      ws.onclose = (e) => Logger.log('warn','WS', 'Closed '+e.code);
+      ws.onmessage = (e) => { try { if (cb) cb(JSON.parse(e.data)); } catch {} };
+    },
+    send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); },
+    close() { if (ws) { ws.close(); ws = null; } }
+  };
+})();
+
+// ── Message Dispatcher ────────────────────────────────────────────────────────
+const MD = {
+  _turns: 0, _navCount: 0,
+  _ignoreAudio: false,
+  reset() {
+    this._turns = 0; this._navCount = 0; this._ignoreAudio = false;
+    VUI.setTurns(0); document.getElementById('st-n').textContent = '0';
+  },
+
+  dispatch(m) {
+    switch (m.type) {
+      case 'log':
+        Logger.log(m.level||'info', m.tag||'SRV', m.data); break;
+
+      case 'session_ready':
+        Logger.log('ok','SESSION','Gemini ready — speak now!');
+        this._ignoreAudio = false;
+        VUI.setConn(true); break;
+
+      case 'audioStream':
+        if (this._ignoreAudio) break;
+        AP.sched(m.data); VUI.setSpeaking(true); break;
+
+      case 'textStream':
+        Logger.log('gemini','G', m.data); break;
+
+      case 'transcript_user':
+        Logger.log('event','USER', m.text); TX.add('user', m.text); break;
+
+      case 'transcript_assistant':
+        Logger.log('gemini','G', m.text); TX.add('agent', m.text); break;
+
+      case 'turn_complete':
+        this._ignoreAudio = false;
+        VUI.setTurns(++this._turns);
+        VUI.setClassifying(true);
+        Logger.log('ok','SESSION', `Turn ${this._turns} · ${m.chunks} chunks · ${m.frags} frags`);
+        setTimeout(() => VUI.setSpeaking(false), AP.tail() + 30); break;
+
+      case 'flash_result':
+        VUI.setClassifying(false);
+        if (m.data && m.data.intent && m.data.intent !== 'chitchat') VUI.setFetchingRAG(true);
+        TX.addFlash(m.data);
+        Logger.log('flash','FLASH', `${m.data.intent} | sq:"${m.data.search_query||''}" | path:${m.data.path||'?'} | kw_id:${JSON.stringify(m.data.keywords_id||[])}`);
+        break;
+
+      case 'tool_call':
+        VUI.setFetchingRAG(false);
+        this._handleToolCall(m); break;
+
+      case 'interrupted':
+        this._ignoreAudio = false;
+        Logger.log('warn','SESSION','Interrupted');
+        AP.flush(); VUI.setSpeaking(false); VUI.setClassifying(false); VUI.setFetchingRAG(false); break;
+
+      case 'flush_audio':
+        this._ignoreAudio = true;
+        AP.flush(); VUI.setSpeaking(false);
+        Logger.log('warn','AUDIO','flush_audio → ignoring new audio chunks'); break;
+
+      case 'memory_stats':
+        Mem.update(m.long_term||{}, m.short_term||[], m.stats||{}); break;
+
+      // v22.0: quota error banner
+      case 'quota_error':
+        VUI.setLive(false); VUI.setConn(false); VUI.setSpeaking(false);
+        VUI.setClassifying(false); VUI.setFetchingRAG(false);
+        AP.flush();
+        _showBanner('⚠️ Kuota Gemini API habis — tunggu beberapa menit lalu coba lagi.', '#ef4444', 15000);
+        Logger.log('error','QUOTA','Gemini API quota exhausted'); break;
+
+      // v22.3: fatal session error (1011 Internal Error etc.)
+      case 'gemini_error':
+        VUI.setLive(false); VUI.setConn(false); VUI.setSpeaking(false);
+        VUI.setClassifying(false); VUI.setFetchingRAG(false);
+        AP.flush();
+        _showBanner(m.message || 'Sesi Gemini terputus. Muat ulang halaman.', '#f59e0b', 12000);
+        Logger.log('error','GEMINI', m.message || 'Session fatal error'); break;
+
+      default:
+        Logger.log('info','WS','Unknown: '+m.type);
+    }
+  },
+
+  _handleToolCall(m) {
+    this._navCount++;
+    document.getElementById('st-n').textContent = String(this._navCount);
+
+    switch (m.action) {
+      case 'open_repository':
+        RepoPanel.render(m);
+        Logger.log('nav','TOOL', `open_repository total=${m.total||0}`); break;
+      case 'open_deep_search':
+        DocPanel.render(m);
+        Logger.log('nav','TOOL', `open_deep_search kind2="${m.kind2||''}"`); break;
+      case 'open_detail':
+        DetailPanel.render(m.data||m);
+        Logger.log('nav','TOOL', `open_detail kind2="${m.kind2||''}"`); break;
+      case 'back_to_repository':
+        PM.backToRepo();
+        Logger.log('nav','TOOL','back_to_repository'); break;
+      case 'close_panel':
+        PM.close();
+        Logger.log('nav','TOOL','close_panel'); break;
+      case 'highlight_keywords': {
+        const kw = m.keywords || [];
+        if (CT.get() === 'docpreview') DocPanel.highlight(kw);
+        Logger.log('nav','HL', `kw:${JSON.stringify(kw)}`); break;
+      }
+      case 'show_news':
+        NewsPanel.render(m);
+        Logger.log('nav','NEWS', `show_news total=${m.total||0}`); break;
+      case 'show_error': {
+        const box = document.createElement('div'); box.className = 'error-box';
+        box.textContent = m.message || 'Terjadi kesalahan.';
+        const rb = document.getElementById('repo-body');
+        if (rb) rb.prepend(box);
+        Logger.log('error','TOOL', m.message||'Error'); break;
+      }
+      default:
+        Logger.log('warn','TOOL', `Unknown action: ${m.action}`);
+    }
+  }
+};
+
+// Banner helper
+function _showBanner(msg, color, ms) {
+  const b = document.createElement('div');
+  b.style.cssText = `position:fixed;top:14px;left:50%;transform:translateX(-50%);
+    background:${color}18;border:1px solid ${color}55;color:${color};
+    padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;
+    z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);backdrop-filter:blur(8px);
+    font-family:'DM Sans',sans-serif;`;
+  b.textContent = msg;
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), ms || 10000);
+}
+
+// Flash result nav fast-path
+const _origDispatch = MD.dispatch.bind(MD);
+MD.dispatch = function(m) {
+  if (m.type === 'flash_result') {
+    MD._lastIntent = m.data.intent;
+    MD._lastKw     = m.data.keywords || [];
+    const it = m.data.intent;
+    if (it === 'back_to_repository') {
+      PM.backToRepo(); Logger.log('nav','FAST','back_to_repository');
+    } else if (it === 'close_panel') {
+      PM.close(); Logger.log('nav','FAST','close_panel');
+    } else if (it === 'highlight_keywords' && CT.get() === 'docpreview') {
+      VUI.setFetchingRAG(false);
+      DocPanel.highlight(m.data.keywords||[]);
+      Logger.log('nav','FAST','highlight_keywords');
+    }
+  }
+  _origDispatch(m);
+};
+
+// ── Session Manager ───────────────────────────────────────────────────────────
+const Session = {
+  _muted: false,
+  async start() {
+    try {
+      MD.reset();
+      document.getElementById('slbl').textContent = 'Menghubungkan…';
+      SM.connect(m => MD.dispatch(m));
+      const dev = document.getElementById('micsel').value;
+      await MR.start(dev, b64 => SM.send({type:'realtimeInput', audioData:b64}));
+      VUI.setLive(true);
+      Logger.log('ok','MIC','Granted');
+    } catch(e) {
+      Logger.log('error','SESSION','Start failed: '+e.message);
+      document.getElementById('slbl').textContent = 'Error — periksa mic';
+    }
+  },
+  end() {
+    Logger.log('event','SESSION','Ending');
+    MR.stop(); AP.flush(); AP.close(); SM.close();
+    VUI.setLive(false); VUI.setConn(false); VUI.setSpeaking(false);
+    VUI.setClassifying(false); VUI.setFetchingRAG(false);
+    this._muted = false; VUI.setMute(false);
+    document.getElementById('msav').style.display = 'inline';
+    this._poll(0);
+  },
+  _poll(n) {
+    if (n >= 30) { Mem.fetch(); document.getElementById('msav').style.display = 'none'; return; }
+    setTimeout(async () => {
+      try {
+        const r = await fetch('/memory/status'); const d = await r.json();
+        if (d.done) { await Mem.fetch(); document.getElementById('msav').style.display = 'none'; Logger.log('memory','MEM','Consolidation done'); }
+        else Session._poll(n+1);
+      } catch { Session._poll(n+1); }
+    }, 2000);
+  },
+  toggleMute() {
+    this._muted = !this._muted;
+    MR.setMuted(this._muted);
+    VUI.setMute(this._muted);
+    Logger.log('event','MIC', this._muted ? 'Muted' : 'Unmuted');
+  }
+};
+
+// ── Help tab ──────────────────────────────────────────────────────────────────
+(function buildHelp() {
+  const p = document.getElementById('t-help');
+  p.style.cssText = 'overflow-y:auto;padding:12px 13px;flex-direction:column;';
+
+  const colorMap = {
+    open_repository:   'var(--acc)',
+    preview_document:  'var(--pur)',
+    highlight_keywords:'var(--yel)',
+    back_to_repository:'var(--t3)',
+    close_panel:       'var(--t3)',
+    chitchat:          'var(--t4)',
+    fetch_news:        'var(--cya)',
+    regulation_query:  'var(--grn)',
+    detail_document:   'var(--yel)',
+  };
+
+  const groups = [
+    { g:'repo', gl:'Cari & Buka Repository', icon:'lucide:database', items:[
+      { t:'open_repository', s:'Open repository',
+        x:'→ membuka daftar repositori dokumen' },
+      { t:'open_repository', s:'Help me to find a legal document',
+        x:'→ open_repository (no qualifier word)' },
+      { t:'open_repository', s:'Find document related to OJK and show the repository',
+        x:'sq:"OJK" → open_repository + panel opens (explicit show)' },
+      { t:'open_repository', s:'Cari dokumen keuangan',
+        x:'→ open_repository (tanpa kata "tentang/like/about")' },
+      { t:'open_repository', s:'Search document from Bank Indonesia 2024',
+        x:'instansi:"Bank Indonesia" tahun:"2024" — no qualifier' },
+      { t:'open_repository', s:'Tampilkan repositori',
+        x:'→ open_repository + panel OPENS (kata eksplisit "tampilkan")' },
+    ]},
+    { g:'query', gl:'Tanya Regulasi (voice-only, PANEL TIDAK PERNAH BUKA)', icon:'lucide:search', items:[
+      { t:'regulation_query', s:'What is macroprudential policy?',
+        x:'→ voice answer from ES only. NEVER opens panel (v23-D).' },
+      { t:'regulation_query', s:'Find a document related to finance',
+        x:'kata "related to" → RULE 4 qualifier → regulation_query (voice-only, no panel!)' },
+      { t:'regulation_query', s:'Search for regulations about monetary policy',
+        x:'kata "about" → RULE 4 qualifier → regulation_query (voice only)' },
+      { t:'regulation_query', s:'Cari dokumen tentang keuangan mikro',
+        x:'kata "tentang" → RULE 4 qualifier → regulation_query (suara saja, panel tidak buka)' },
+      { t:'regulation_query', s:'Find me regulations like macroprudential',
+        x:'kata "like" → RULE 4 → regulation_query (NEVER panel, voice ES answer)' },
+      { t:'regulation_query', s:'Apa itu Giro Wajib Minimum?',
+        x:'→ AI jawab dari konteks ES, tidak buka repositori' },
+    ]},
+    { g:'prev', gl:'Preview Dokumen', icon:'lucide:file-text', items:[
+      { t:'preview_document', s:'Preview POJK 77 tahun 2016',
+        x:'doc:"POJK Nomor 77 Tahun 2016"' },
+      { t:'preview_document', s:'Open PBI nomor 17 tahun 2015',
+        x:'doc:"Peraturan Bank Indonesia Nomor 17 Tahun 2015"' },
+      { t:'preview_document', s:'Buka dokumen PP 45 tahun 2005',
+        x:'doc:"PP Nomor 45 Tahun 2005"' },
+      { t:'preview_document', s:'Preview peraturan anggota dewan gubernur nomor 1 tahun 2026',
+        x:'doc:"PADG Nomor 1 Tahun 2026" → deep_search' },
+      { t:'preview_document', s:'Open the document Giro Wajib Minimum Makroprudensial',
+        x:'v22.3: kind2 topik → ES search dulu → cari kind2 resmi' },
+    ]},
+    { g:'hl', gl:'Highlight Keywords (hanya di halaman dokumen)', icon:'lucide:highlighter', items:[
+      { t:'highlight_keywords', s:'Find the word pinjam on this page',
+        x:'page=docpreview, kw:["pinjam"]' },
+      { t:'highlight_keywords', s:'Highlight keyword teknologi here',
+        x:'kw:["teknologi","technology"]' },
+      { t:'highlight_keywords', s:'Cari kata keuangan di halaman ini',
+        x:'kw:["keuangan","finance"]' },
+      { t:'highlight_keywords', s:'Mark the word pasal on this document',
+        x:'kw:["pasal"]' },
+    ]},
+    { g:'news', gl:'Berita Hukum & Keuangan Terbaru', icon:'lucide:newspaper', items:[
+      { t:'fetch_news', s:'Carikan berita keuangan terbaru',
+        x:'→ fetch_news, RSS feeds 5 artikel' },
+      { t:'fetch_news', s:'Ada berita regulasi apa hari ini?',
+        x:'→ fetch_news, topik: regulasi' },
+      { t:'fetch_news', s:'Latest news about Bank Indonesia regulations',
+        x:'→ fetch_news, sq:"Bank Indonesia Regulations"' },
+      { t:'fetch_news', s:'Find me the latest news of OJK',
+        x:'kata "latest news" → fetch_news (bukan open_repository)' },
+      { t:'fetch_news', s:'Info terbaru peraturan keuangan Indonesia',
+        x:'→ fetch_news, RSS: Detik Finance, CNBC Indonesia, OJK' },
+      { t:'fetch_news', s:'Tell me the news about Bank Indonesia',
+        x:'→ fetch_news, voice-only (panel hanya jika "tampilkan")' },
+    ]},
+    { g:'nav', gl:'Navigasi', icon:'lucide:navigation', items:[
+      { t:'back_to_repository', s:'Back to repository',
+        x:'→ back_to_repository' },
+      { t:'back_to_repository', s:'Kembali ke daftar',
+        x:'→ back_to_repository' },
+      { t:'close_panel',        s:'Close this page',
+        x:'→ close_panel' },
+      { t:'close_panel',        s:'Tutup panel ini',
+        x:'→ close_panel' },
+      { t:'close_panel',        s:'Go home',
+        x:'→ close_panel → kembali ke home' },
+    ]},
+    { g:'chat', gl:'Chitchat (tidak buka panel)', icon:'lucide:message-circle', items:[
+      { t:'chitchat', s:'How are you today?',
+        x:'→ English reply (user spoke English) — 0ms Layer-0' },
+      { t:'chitchat', s:'Apa kabar?',
+        x:'→ Indonesian reply (user spoke Indonesian) — 0ms Layer-0' },
+      { t:'chitchat', s:'What is Bank Indonesia?',
+        x:'→ English reply from general knowledge' },
+      { t:'chitchat', s:'Siapa gubernur Bank Indonesia?',
+        x:'→ Indonesian reply, tidak buka repositori' },
+      { t:'chitchat', s:"I'm fine, thank you",
+        x:'→ English reply — Layer-0 chitchat skip, 0ms latency' },
+    ]},
+    { g:'lang', gl:'Language Mirroring (v23)', icon:'lucide:languages', items:[
+      { t:'chitchat', s:'Hello, can you help me find OJK regulations?',
+        x:'→ AI replies in ENGLISH (user spoke English) → routes to open_repository' },
+      { t:'open_repository', s:'Hai, cari peraturan OJK tentang keuangan',
+        x:'→ AI replies in INDONESIAN (user spoke Indonesian) → regulation_query' },
+      { t:'fetch_news', s:'Tell me the latest news about Bank Indonesia',
+        x:'→ AI news summary in ENGLISH' },
+      { t:'fetch_news', s:'Berita terbaru Bank Indonesia dong',
+        x:'→ AI news summary in INDONESIAN' },
+    ]},
+  ];
+
+  // Info banner
+  const note = document.createElement('div');
+  note.style.cssText = `font-size:9px;color:var(--t2);padding:9px 11px;
+    background:var(--s2);border:1px solid var(--bdr);
+    border-radius:var(--r2);margin-bottom:14px;
+    font-family:'DM Mono',monospace;line-height:1.65;`;
+  note.innerHTML =
+    `<span style="color:var(--acc);font-weight:700;">v23.0 — Vertex AI | Six-Path Routing</span><br>` +
+    `PATH 1  chitchat:          0ms   — Layer-0 skip (no Flash)<br>` +
+    `PATH 1B anaphoric:         ~0.8s — Flash + STM context (Vertex)<br>` +
+    `PATH 1C STM follow-up:     ~0.8s — Flash + Rule 0A (Vertex)<br>` +
+    `PATH 2  nav (close/back):  0ms   — Layer-1 fast, no Flash<br>` +
+    `PATH 3  fetch_news:        ~1.2s — Flash + RSS feeds<br>` +
+    `PATH 4  RAG (doc/query):   ~0.5s — Flash ‖ ES parallel<br>` +
+    `<br>` +
+    `<span style="color:var(--acc);font-weight:700;">🌐 LANGUAGE:</span> AI always replies in the user's language.<br>` +
+    `English user → English reply. Indonesian user → Indonesian reply. Auto-detect per turn.<br>` +
+    `<br>` +
+    `<span style="color:var(--red);font-weight:700;">⚠ PANEL POLICY (v23):</span><br>` +
+    `<span style="color:var(--grn);font-weight:600;">regulation_query</span> = <b>ALWAYS voice-only</b>, NEVER opens panel.<br>` +
+    `Even "find regulations about X" → voice ES answer only. No panel.<br>` +
+    `<span style="color:var(--grn);font-weight:600;">open_repository</span> = voice-only UNLESS you say: <b>"tampilkan repositori"</b> / <b>"open repository"</b> / <b>"show me"</b><br>` +
+    `<span style="color:var(--grn);font-weight:600;">preview_document</span> = ALWAYS opens document panel (specific doc name + number)<br>` +
+    `<br>` +
+    `<span style="color:var(--red);font-weight:700;">⚠ RULE 3 vs RULE 4:</span><br>` +
+    `<span style="color:var(--grn);font-weight:600;">open_repository</span> = "find document about finance" (no qualifier, shows list)<br>` +
+    `<span style="color:var(--grn);font-weight:600;">regulation_query</span> = "find regulations <b>like/about/similar to/tentang</b> finance" (voice ES answer)<br>` +
+    `<br>` +
+    `<span style="color:var(--yel);font-weight:700;">VAD v22.2:</span> silence=1600ms end=LOW start=LOW — prevents premature cut mid-sentence.<br>` +
+    `<span style="color:var(--yel);font-weight:700;">Anti-stuck v23:</span> Placeholder timeout 8000ms — auto-closes stuck turns.<br>` +
+    `<span style="color:var(--grn);">Cancel words:</span> stop, berhenti, cancel, batalkan, cukup, wait, tunggu`;
+  p.appendChild(note);
+
+  groups.forEach(grp => {
+    const sec = document.createElement('div'); sec.className = 'hg';
+    const h   = document.createElement('div'); h.className = 'hgh';
+    h.innerHTML = `<iconify-icon icon="${grp.icon}" width="12" height="12"></iconify-icon>${grp.gl}`;
+    sec.appendChild(h);
+    grp.items.forEach(ex => {
+      const r = document.createElement('div'); r.className = 'eg';
+      const clr = colorMap[ex.t] || 'var(--t3)';
+      r.innerHTML = `<div class="eg-t" style="color:${clr}">${ex.t}</div>
+        <div class="eg-s">"${ex.s}"</div>
+        <div class="eg-x">${ex.x}</div>`;
+      sec.appendChild(r);
+    });
+    p.appendChild(sec);
+  });
+})();
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.getElementById('mbtn').onclick    = () => Session.start();
+document.getElementById('endbtn').onclick  = () => Session.end();
+document.getElementById('mutebtn').onclick = () => Session.toggleMute();
+document.getElementById('clrlg').onclick   = () => Logger.clear();
+document.getElementById('clrmem').onclick  = () => Mem.clear();
+
+document.querySelectorAll('.tbtn').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.tbtn').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tpane').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('t-' + b.dataset.tab).classList.add('active');
+  };
+});
+
+async function enumMics() {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const mics    = devices.filter(d => d.kind === 'audioinput');
+    const sel     = document.getElementById('micsel');
+    sel.innerHTML = '<option value="" disabled selected>Select microphone…</option>';
+    mics.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.deviceId;
+      o.text  = m.label || 'Mic '+sel.options.length;
+      sel.appendChild(o);
+    });
+    if (mics.length) sel.value = mics[0].deviceId;
+    Logger.log('info','MIC', mics.length+' device(s) found');
+  } catch {}
+}
+
+enumMics();
+navigator.mediaDevices.addEventListener('devicechange', enumMics);
+Mem.fetch();
+Logger.log('ok','UI','Ready — tap mic to begin');
+Logger.log('ok','UI','v23.0: Vertex AI | Language mirroring | regulation_query always voice-only | Anti-stuck placeholder timeout');
+</script>
+</body>
+</html>

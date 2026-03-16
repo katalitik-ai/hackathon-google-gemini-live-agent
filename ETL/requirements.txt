@@ -1,0 +1,7 @@
+selenium
+requests
+pdfplumber
+pymupdf
+elasticsearch
+python-dotenv
+tqdm
