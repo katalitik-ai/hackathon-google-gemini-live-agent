@@ -75,7 +75,7 @@ The pipeline consists of three main components.
 - Ingests data into Elasticsearch
 
 ```
-scrape → download → OCR → ingest
+scrape → download → OCR → parse → ingest
 ```
 
 ---
