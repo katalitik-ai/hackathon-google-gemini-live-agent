@@ -32,4 +32,4 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 Copy and paste the following block into your terminal to install dependencies, setup the local environment variable, and start the development server all at once:
 
 ```bash
-npm install && echo "VITE_WS_URL=ws://localhost:8080/ws" > .env && npm run dev
+npm install && echo "VITE_WS_URL=<URL_FROM_VOICE_AGENT>" > .env && npm run dev

@@ -108,7 +108,7 @@ Navigate to the frontend directory, install dependencies, set the WebSocket URL,
 ```bash
 cd frontend
 npm install
-echo "VITE_WS_URL=ws://localhost:8001/ws" > .env
+echo "VITE_WS_URL=<URL_FROM_STEP_3>" > .env
 npm run dev
 
 ```
