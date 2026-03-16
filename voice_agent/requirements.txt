@@ -1,0 +1,18 @@
+# Core
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+
+# Google AI
+google-genai>=0.8.0
+
+# Elasticsearch
+elasticsearch==8.11.0
+
+# Settings & utils
+pydantic-settings>=2.2.0
+python-dateutil>=2.9.0
+
+# Optional (Colab tunneling)
+pyngrok>=7.0.0
+nest_asyncio>=1.6.0
